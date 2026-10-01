@@ -1,22 +1,12 @@
 // src/app/index.tsx
 import { useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { colors } from '../theme/colors';
 
 export default function Index() {
   const router = useRouter();
 
-  useEffect(() => {
-    // ⏱️ Transição automática após 4 segundos como segurança
-    const timer = setTimeout(() => {
-      handleNavigate();
-    }, 4000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Função centralizada para navegar com segurança limpando o histórico
+  // 🛑 TEMPO DE TRANSIÇÃO REMOVEDO: Agora a navegação depende apenas do clique manual do aluno
   const handleNavigate = () => {
     router.replace('/login');
   };
@@ -26,21 +16,29 @@ export default function Index() {
       
       {/* 🔮 Bloco Central Premium */}
       <View style={styles.centerContent}>
-        <View style={styles.glowEffect} />
         
+        {/* 1. 🔺 Título "Meu ENEM" em CIMA */}
         <Text style={styles.title}>Meu ENEM</Text>
         
         <View style={styles.badge}>
           <Text style={styles.badgeText}>INTELICAMPUS</Text>
         </View>
         
+        {/* 2. 🟢 O Logo no CÍRCULO perfeito (Fundo branco quadrado cortado) */}
+        <View style={styles.logoWrapper}>
+          <Image 
+            source={require('../../assets/images/logo.png')} 
+            style={styles.logoImage}
+            resizeMode="cover"
+          />
+        </View>
+
+        {/* 3. 🔻 A frase em BAIXO do círculo */}
         <Text style={styles.subtitle}>
           Seu caminho para o ENEM começa aqui.
         </Text>
         
-        <ActivityIndicator size="small" color={colors.primary} style={{ marginTop: 24, marginBottom: 24 }} />
-
-        {/* 🔘 BOTÃO ADICIONADO PARA ENTRAR DIRETO NO LOGIN */}
+        {/* 🔘 BOTÃO PARA ENTRAR DIRETO NO LOGIN */}
         <TouchableOpacity style={styles.actionButton} onPress={handleNavigate} activeOpacity={0.8}>
           <Text style={styles.actionButtonText}>Começar Jornada ➔</Text>
         </TouchableOpacity>
@@ -60,6 +58,7 @@ export default function Index() {
   );
 }
 
+// 🎨 Estilos Alinhados e Separados Linha por Linha
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -73,21 +72,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    position: 'relative',
-  },
-  glowEffect: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: colors.primary,
-    opacity: 0.15,
   },
   title: {
     fontSize: 48,
     fontWeight: '800',
     color: colors.textMain,
     letterSpacing: -1.5,
+    textAlign: 'center',
   },
   badge: {
     backgroundColor: colors.primaryLight,
@@ -97,6 +88,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     borderWidth: 1,
     borderColor: colors.border,
+    marginBottom: 24, 
   },
   badgeText: {
     color: colors.primary,
@@ -104,15 +96,32 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 1,
   },
+  /* Contêiner circular do Logotipo */
+  logoWrapper: {
+    width: 130,
+    height: 130,
+    borderRadius: 65, 
+    backgroundColor: '#FFFFFF', 
+    borderWidth: 3,
+    borderColor: colors.primary, 
+    overflow: 'hidden', 
+    justifyContent: 'center',
+    alignItems: 'center',
+    boxShadow: '0px 0px 15px rgba(99, 102, 241, 0.4)', 
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
+  },
   subtitle: {
-    marginTop: 100,
+    marginTop: 20, 
     color: colors.textMuted,
     fontSize: 15,
     textAlign: 'center',
     maxWidth: 280,
     lineHeight: 22,
+    marginBottom: 24, // Dá um espaço confortável antes do botão de jornada
   },
-  /* Estilização do novo botão de entrada rápida */
   actionButton: {
     backgroundColor: colors.primary,
     paddingVertical: 14,
@@ -121,11 +130,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
-    shadowColor: colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
+    boxShadow: '0px 4px 14px rgba(99, 102, 241, 0.3)',
   },
   actionButtonText: {
     color: '#FFFFFF',
