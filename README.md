@@ -1,56 +1,282 @@
-# Welcome to your Expo app 👋
+# 🎓 Meu ENEM
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo mobile desenvolvido para auxiliar estudantes na preparação para o Exame Nacional do Ensino Médio (ENEM), oferecendo recursos para organização dos estudos, acesso a conteúdos, revisões, simulados e auxílio por Inteligência Artificial.
 
-## Get started
+---
 
-1. Install dependencies
+## 📱 Sobre o projeto
 
-   ```bash
-   npm install
-   ```
+O **Meu ENEM** é um aplicativo desenvolvido como projeto acadêmico do curso de **Análise e Desenvolvimento de Sistemas (ADS)**.
 
-2. Start the app
+A proposta é oferecer aos estudantes uma ferramenta que facilite a organização da preparação para o ENEM, reunindo diferentes recursos de estudo em um único aplicativo.
 
-   ```bash
-   npx expo start
-   ```
+O aplicativo busca proporcionar uma experiência simples, organizada e acessível para estudantes que desejam acompanhar sua preparação para a prova.
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🎯 Objetivo
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+O objetivo do Meu ENEM é ajudar estudantes a:
 
-## Get a fresh project
+- Organizar seus estudos;
+- Acessar conteúdos para preparação;
+- Criar e acompanhar um cronograma;
+- Realizar revisões;
+- Consultar materiais de estudo;
+- Responder simulados e questões;
+- Utilizar Inteligência Artificial para auxiliar nas dúvidas;
+- Acompanhar seu desempenho.
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
+## 🚀 Funcionalidades
+
+### 📚 Conteúdos
+
+Permite ao estudante acessar conteúdos relacionados às áreas de conhecimento do ENEM.
+
+### 📅 Cronograma
+
+Auxilia na organização da rotina de estudos, permitindo que o estudante acompanhe o que precisa estudar.
+
+### 📝 Revisões e materiais
+
+Reúne recursos que podem ser utilizados para revisar os conteúdos estudados e apoiar a preparação.
+
+### 🤖 Inteligência Artificial
+
+A Inteligência Artificial tem como objetivo auxiliar o estudante durante os estudos, principalmente em dúvidas relacionadas aos conteúdos e questões.
+
+### 🧠 Simulados e questões
+
+Permite que o estudante pratique por meio de questões e simulados, ajudando na preparação para o ENEM e no acompanhamento do desempenho.
+
+---
+
+## 🛠️ Tecnologias utilizadas
+
+O projeto foi desenvolvido utilizando tecnologias voltadas para desenvolvimento de aplicações mobile.
+
+### React Native
+
+Framework utilizado para desenvolvimento da aplicação mobile utilizando JavaScript/TypeScript e componentes nativos.
+
+### Expo
+
+Plataforma utilizada para facilitar o desenvolvimento, execução e testes da aplicação React Native.
+
+### Expo Router
+
+Utilizado para organizar a navegação entre as telas do aplicativo.
+
+### JavaScript / TypeScript
+
+Utilizados na implementação da lógica e dos componentes da aplicação.
+
+### Git
+
+Sistema de controle de versão utilizado para acompanhar as alterações realizadas no projeto.
+
+### GitHub
+
+Plataforma utilizada para armazenar o código-fonte e permitir o trabalho colaborativo entre os integrantes do grupo.
+
+---
+
+## 📂 Estrutura do projeto
+
+A estrutura principal do projeto utiliza o Expo Router.
+
+```text
+meu-enem/
+│
+├── assets/
+│   └── images/
+│       └── logo.png
+│
+├── src/
+│   └── app/
+│       └── index.tsx
+│
+├── package.json
+├── app.json
+├── tsconfig.json
+├── README.md
+└── ...
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### `src/app`
 
-### Other setup steps
+Contém as telas e rotas principais da aplicação.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+### `assets`
 
-## Learn more
+Contém recursos utilizados pela aplicação, como imagens e o logotipo.
 
-To learn more about developing your project with Expo, look at the following resources:
+### `package.json`
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Contém informações do projeto e suas dependências.
 
-## Join the community
+### `app.json`
 
-Join our community of developers creating universal apps.
+Contém configurações do aplicativo Expo.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### `README.md`
+
+Documento com informações e instruções sobre o projeto.
+
+---
+
+## 💻 Como executar o projeto
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/MarieKatianaPierre/meu-enem.git
+```
+
+### 2. Entrar na pasta
+
+```bash
+cd meu-enem
+```
+
+### 3. Instalar as dependências
+
+```bash
+npm install
+```
+
+### 4. Iniciar o Expo
+
+```bash
+npx expo start
+```
+
+Depois disso, será exibido um QR Code no terminal.
+
+O aplicativo pode ser executado utilizando:
+
+- Expo Go no celular;
+- Navegador;
+- Emulador Android;
+- Emulador iOS, quando disponível.
+
+---
+
+## 📱 Executar no celular
+
+Para testar pelo celular:
+
+1. Instale o **Expo Go**;
+2. Conecte o celular e o computador à mesma rede Wi-Fi;
+3. Execute:
+
+```bash
+npx expo start
+```
+
+4. Escaneie o QR Code apresentado pelo Expo.
+
+---
+
+## 🔀 Git e GitHub
+
+O GitHub é utilizado para permitir que os integrantes do grupo trabalhem no mesmo projeto.
+
+### Verificar o status
+
+```bash
+git status
+```
+
+### Baixar alterações do GitHub
+
+```bash
+git pull
+```
+
+### Adicionar alterações
+
+```bash
+git add .
+```
+
+### Criar um commit
+
+```bash
+git commit -m "Descrição da alteração"
+```
+
+### Enviar alterações
+
+```bash
+git push
+```
+
+### Atualizar o projeto antes de começar a trabalhar
+
+É recomendado executar:
+
+```bash
+git pull
+```
+
+antes de começar novas alterações.
+
+---
+
+## 👥 Trabalho em equipe
+
+Cada integrante pode trabalhar em uma parte do projeto.
+
+Para evitar conflitos, é recomendado:
+
+1. Atualizar o projeto com `git pull`;
+2. Fazer as alterações;
+3. Testar o aplicativo;
+4. Executar `git status`;
+5. Criar um commit;
+6. Enviar as alterações com `git push`.
+
+---
+
+## 🎨 Identidade do projeto
+
+**Nome:** Meu ENEM
+
+**Categoria:** Aplicativo educacional
+
+**Público-alvo:** Estudantes que estão se preparando para o ENEM.
+
+**Objetivo:** Auxiliar na organização e preparação dos estudos.
+
+---
+
+## 📌 Status do projeto
+
+🚧 **Em desenvolvimento**
+
+O projeto está sendo desenvolvido de forma incremental. Novas telas, funcionalidades e melhorias podem ser adicionadas durante o desenvolvimento.
+
+---
+
+## 🎓 Projeto acadêmico
+
+Projeto desenvolvido como atividade acadêmica do curso de:
+
+**Análise e Desenvolvimento de Sistemas — ADS**
+
+**Instituição:** UniNorte
+
+---
+
+## 👩‍💻 Equipe
+
+Projeto desenvolvido pelo grupo responsável pelo desenvolvimento do **Meu ENEM**.
+
+---
+
+## 📄 Licença
+
+Este projeto foi desenvolvido para fins acadêmicos.
