@@ -1,158 +1,341 @@
-// src/app/perfil.tsx
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
+
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Switch,
+  Alert,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+
 import { colors } from '../theme/colors';
+import { Home,
+  BookOpen,
+  ClipboardList,
+  UserRound, } from 'lucide-react-native';
+
+const CHAVE_USUARIO = '@meu_enem_usuario';
+const CHAVE_NOTIFICACOES = '@meu_enem_notificacoes';
+const CHAVE_TEMA = '@meu_enem_tema_escuro';
+
+type DadosUsuario = {
+  nome?: string;
+  email?: string;
+  iniciais?: string;
+};
 
 export default function ProfileScreen() {
   const router = useRouter();
 
-  // Estados para simular as configurações ativas do aplicativo
   const [notificacoes, setNotificacoes] = useState(true);
   const [temaEscuro, setTemaEscuro] = useState(true);
-
-  // Estados dinâmicos para receber os dados reais do aluno vindo do cadastro/login
   const [nome, setNome] = useState('Estudante');
-  const [email, setEmail] = useState('carregando...');
+  const [email, setEmail] = useState('');
   const [iniciais, setIniciais] = useState('EE');
+  const [carregando, setCarregando] = useState(true);
 
-    // Carrega os dados reais do aluno de forma segura no Celular e na Web
+  // Carrega os dados salvos no celular ou na versão web.
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const usuarioSalvo = localStorage.getItem('@meu_enem_usuario');
-        
-        if (usuarioSalvo) {
-          const dados = JSON.parse(usuarioSalvo);
-          setNome(dados.nome);
-          setEmail(dados.email);
-          setIniciais(dados.iniciais);
-          return; // Para a execução aqui se achou os dados
-        }
-      }
-      
-      // 📱 DADOS PADRÃO DE SEGURANÇA (Se rodar direto no celular sem passar pelo cadastro Web)
-      setNome('Arthur Mendonça');
-      setEmail('arthur.enem2026@email.com');
-      setIniciais('AM');
+    async function carregarDados() {
+      try {
+        const [usuarioSalvo, notificacoesSalvas, temaSalvo] =
+          await Promise.all([
+            AsyncStorage.getItem(CHAVE_USUARIO),
+            AsyncStorage.getItem(CHAVE_NOTIFICACOES),
+            AsyncStorage.getItem(CHAVE_TEMA),
+          ]);
 
-    } catch (error) {
-      console.error("Erro ao carregar dados do usuário no perfil:", error);
+        if (usuarioSalvo) {
+          const dados = JSON.parse(usuarioSalvo) as DadosUsuario;
+
+          setNome(dados.nome || 'Estudante');
+          setEmail(dados.email || '');
+
+          const iniciaisCalculadas = (dados.nome || 'EE')
+            .trim()
+            .split(/\s+/)
+            .slice(0, 2)
+            .map((parte) => parte.charAt(0))
+            .join('')
+            .toUpperCase();
+
+          setIniciais(
+            dados.iniciais || iniciaisCalculadas || 'EE'
+          );
+        } else {
+          setNome('Estudante');
+          setEmail('');
+          setIniciais('EE');
+        }
+
+        if (notificacoesSalvas !== null) {
+          setNotificacoes(notificacoesSalvas === 'true');
+        }
+
+        if (temaSalvo !== null) {
+          setTemaEscuro(temaSalvo === 'true');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar perfil:', error);
+        Alert.alert(
+          'Atenção',
+          'Não foi possível carregar todos os dados do perfil.'
+        );
+      } finally {
+        setCarregando(false);
+      }
     }
+
+    carregarDados();
   }, []);
 
+  // Salva a preferência de notificações.
+  const alternarNotificacoes = async (valor: boolean) => {
+    setNotificacoes(valor);
 
-    const handleSairDaConta = () => {
     try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.removeItem('@meu_enem_usuario');
-      }
-    } catch (e) {
-      console.error(e);
+      await AsyncStorage.setItem(
+        CHAVE_NOTIFICACOES,
+        String(valor)
+      );
+    } catch (error) {
+      console.error('Erro ao salvar notificações:', error);
+      Alert.alert(
+        'Erro',
+        'Não foi possível salvar essa preferência.'
+      );
     }
-    router.replace('/login');
   };
+
+  // Salva a preferência de tema.
+  const alternarTema = async (valor: boolean) => {
+    setTemaEscuro(valor);
+
+    try {
+      await AsyncStorage.setItem(CHAVE_TEMA, String(valor));
+    } catch (error) {
+      console.error('Erro ao salvar tema:', error);
+      Alert.alert(
+        'Erro',
+        'Não foi possível salvar essa preferência.'
+      );
+    }
+  };
+
+  // Abre a tela de recuperação de senha existente no projeto.
+  const handleAlterarSenha = () => {
+    router.push('/recuperar');
+  };
+
+  // Exibe os termos enquanto a tela específica não existe.
+  const handleTermos = () => {
+    Alert.alert(
+      'Privacidade e uso',
+      'O Meu ENEM é um aplicativo de apoio aos estudos. ' +
+        'Os dados do perfil são armazenados localmente neste dispositivo. ' +
+        'Esta versão demonstrativa ainda não possui um sistema completo ' +
+        'de autenticação ou uma política de privacidade publicada.'
+    );
+  };
+
+  // Remove os dados do perfil e retorna ao login.
+     
+const handleSairDaConta = async () => {
+  try {
+    await AsyncStorage.removeItem('@meu_enem_usuario');
+    router.replace('/login');
+  } catch (error) {
+    console.error('Erro ao sair da conta:', error);
+
+    Alert.alert(
+      'Erro',
+      'Não foi possível sair da conta. Tente novamente.'
+    );
+  }
+};
+
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
-        {/* 👤 Cabeçalho com as Informações Reais do Aluno */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Informações do aluno */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarCircle}>
             <Text style={styles.avatarText}>{iniciais}</Text>
           </View>
-          <Text style={styles.profileName}>{nome}</Text>
-          <Text style={styles.profileEmail}>{email}</Text>
+
+          <Text style={styles.profileName}>
+            {carregando ? 'Carregando perfil...' : nome}
+          </Text>
+
+          <Text style={styles.profileEmail}>
+            {email || 'E-mail não informado'}
+          </Text>
+
           <View style={styles.badgeSerie}>
-            <Text style={styles.badgeSerieText}>Candidato ENEM • 3º Ano Médio</Text>
+            <Text style={styles.badgeSerieText}>
+              Candidato ENEM
+            </Text>
           </View>
         </View>
 
-        {/* 📊 Resumo de Métricas de Engajamento */}
-        <Text style={styles.sectionTitle}>Seu Progresso no MVP</Text>
+        {/* Progresso do aluno */}
+        <Text style={styles.sectionTitle}>
+          Seu Progresso no MVP
+        </Text>
+
         <View style={styles.metricsContainer}>
           <View style={styles.metricRow}>
-            <Text style={styles.metricLabel}>📅 Metas do Cronograma</Text>
-            <Text style={[styles.metricValue, { color: colors.success }]}>65% Feito</Text>
+            <Text style={styles.metricLabel}>
+              📅 Metas do Cronograma
+            </Text>
+            <Text
+              style={[
+                styles.metricValue,
+                { color: colors.success },
+              ]}
+            >
+              65% Feito
+            </Text>
           </View>
+
           <View style={styles.metricRow}>
-            <Text style={styles.metricLabel}>📝 Média nos Simulados</Text>
-            <Text style={[styles.metricValue, { color: colors.primary }]}>680 pts</Text>
+            <Text style={styles.metricLabel}>
+              📝 Média nos Simulados
+            </Text>
+            <Text
+              style={[
+                styles.metricValue,
+                { color: colors.primary },
+              ]}
+            >
+              680 pts
+            </Text>
           </View>
         </View>
 
-        {/* ⚙️ Seção de Configurações */}
-        <Text style={styles.sectionTitle}>Ajustes do Aplicativo</Text>
+        {/* Configurações */}
+        <Text style={styles.sectionTitle}>
+          Ajustes do Aplicativo
+        </Text>
+
         <View style={styles.settingsBox}>
-          
-          {/* Alternar Notificações */}
           <View style={styles.settingItem}>
-            <View>
-              <Text style={styles.settingItemTitle}>🔔 Notificações Push</Text>
-              <Text style={styles.settingItemDesc}>Lembretes de estudo diários</Text>
+            <View style={styles.settingDescription}>
+              <Text style={styles.settingItemTitle}>
+                🔔 Notificações Push
+              </Text>
+              <Text style={styles.settingItemDesc}>
+                Preferência para lembretes de estudo
+              </Text>
             </View>
+
             <Switch
               value={notificacoes}
-              onValueChange={setNotificacoes}
-              trackColor={{ false: '#2E2559', true: colors.primary }}
-              thumbColor={notificacoes ? colors.success : '#94A3B8'}
+              onValueChange={alternarNotificacoes}
+              trackColor={{
+                false: '#2E2559',
+                true: colors.primary,
+              }}
+              thumbColor={
+                notificacoes ? colors.success : '#94A3B8'
+              }
             />
           </View>
 
-          {/* Alternar Tema Escuro */}
           <View style={styles.settingItem}>
-            <View>
-              <Text style={styles.settingItemTitle}>🌗 Dark Mode Premium</Text>
-              <Text style={styles.settingItemDesc}>Economia de bateria ativa</Text>
+            <View style={styles.settingDescription}>
+              <Text style={styles.settingItemTitle}>
+                🌗 Dark Mode Premium
+              </Text>
+              <Text style={styles.settingItemDesc}>
+                Preferência de tema do aplicativo
+              </Text>
             </View>
+
             <Switch
               value={temaEscuro}
-              onValueChange={setTemaEscuro}
-              trackColor={{ false: '#2E2559', true: colors.primary }}
-              thumbColor={temaEscuro ? colors.success : '#94A3B8'}
+              onValueChange={alternarTema}
+              trackColor={{
+                false: '#2E2559',
+                true: colors.primary,
+              }}
+              thumbColor={
+                temaEscuro ? colors.success : '#94A3B8'
+              }
             />
           </View>
 
-          {/* Opção: Alterar Senha */}
-          <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
-            <Text style={styles.linkRowText}>🔑 Alterar senha de acesso</Text>
+          <TouchableOpacity
+            style={styles.linkRow}
+            activeOpacity={0.7}
+            onPress={handleAlterarSenha}
+          >
+            <Text style={styles.linkRowText}>
+              🔑 Alterar senha de acesso
+            </Text>
             <Text style={styles.arrowIcon}>➔</Text>
           </TouchableOpacity>
 
-          {/* Opção: Termos de Uso */}
-          <TouchableOpacity style={styles.linkRow} activeOpacity={0.7}>
-            <Text style={styles.linkRowText}>📄 Termos de privacidade & Uso</Text>
+          <TouchableOpacity
+            style={styles.linkRow}
+            activeOpacity={0.7}
+            onPress={handleTermos}
+          >
+            <Text style={styles.linkRowText}>
+              📄 Termos de privacidade & Uso
+            </Text>
             <Text style={styles.arrowIcon}>➔</Text>
           </TouchableOpacity>
         </View>
 
-        {/* 🚪 Botão Sair da Conta */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleSairDaConta} activeOpacity={0.8}>
-          <Text style={styles.logoutButtonText}>Sair da Minha Conta 🚪</Text>
+        {/* Sair */}
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleSairDaConta}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.logoutButtonText}>
+            Sair da Minha Conta 🚪
+          </Text>
         </TouchableOpacity>
-
       </ScrollView>
 
-      {/* 🦶 Rodapé de Navegação Fixo Unificado */}
+      {/* Navegação inferior preservada */}
       <View style={styles.tabBarFixed}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/home')}>
-          <Text style={{ fontSize: 20 }}>🏠</Text>
+        <TouchableOpacity
+          style={styles.tabItem}
+          onPress={() => router.push('/home')}
+        >
+          <Home color={colors.textMuted} size={22} />
           <Text style={styles.footerTabText}>Home</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/materias')}>
-          <Text style={{ fontSize: 20 }}>📚</Text>
+
+        <TouchableOpacity
+          style={styles.tabItem}
+          onPress={() => router.push('/materias')}
+        >
+          <BookOpen color={colors.primary} size={22} />
           <Text style={styles.footerTabText}>Estudos</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/simulado')}>
-          <Text style={{ fontSize: 20 }}>📝</Text>
+        <TouchableOpacity
+          style={styles.tabItem}
+          onPress={() => router.push('/simulado')}
+        >
+          <ClipboardList color={colors.textMuted} size={22} />
           <Text style={styles.footerTabText}>Simulado</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItemActive}>
-          <Text style={{ fontSize: 20 }}>👤</Text>
+           <UserRound color={colors.primary} size={22} />
           <Text style={styles.footerTabTextActive}>Perfil</Text>
         </TouchableOpacity>
       </View>
@@ -160,7 +343,6 @@ export default function ProfileScreen() {
   );
 }
 
-// 🎨 Bloco de Estilos Totalmente Separado e Alinhado Linha por Linha
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -170,8 +352,6 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 110,
   },
-  
-  // Bloco do cabeçalho do perfil
   profileHeader: {
     alignItems: 'center',
     marginTop: 20,
@@ -197,11 +377,13 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: colors.textMain,
     marginTop: 14,
+    textAlign: 'center',
   },
   profileEmail: {
     fontSize: 14,
     color: colors.textMuted,
     marginTop: 4,
+    textAlign: 'center',
   },
   badgeSerie: {
     backgroundColor: colors.primaryLight,
@@ -217,8 +399,6 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: 'bold',
   },
-  
-  // Títulos de blocos
   sectionTitle: {
     fontSize: 15,
     fontWeight: '700',
@@ -226,8 +406,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     marginTop: 16,
   },
-  
-  // Caixa contêiner das métricas
   metricsContainer: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -241,18 +419,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
   },
   metricLabel: {
     fontSize: 14,
     color: colors.textMain,
     fontWeight: '500',
+    flexShrink: 1,
   },
   metricValue: {
     fontSize: 14,
     fontWeight: 'bold',
   },
-  
-  // Caixa contêiner das configurações de ajustes
   settingsBox: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -269,6 +447,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    gap: 12,
+  },
+  settingDescription: {
+    flex: 1,
   },
   settingItemTitle: {
     fontSize: 14,
@@ -292,14 +474,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: colors.textMain,
+    flexShrink: 1,
   },
   arrowIcon: {
     fontSize: 12,
     color: colors.textMuted,
     fontWeight: 'bold',
+    marginLeft: 8,
   },
-  
-  // Botão vermelho de Logout
   logoutButton: {
     backgroundColor: 'rgba(244, 63, 94, 0.1)',
     borderWidth: 1,
@@ -315,8 +497,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
   },
-  
-  // Rodapé fixo de navegação
   tabBarFixed: {
     position: 'absolute',
     bottom: 0,
@@ -337,6 +517,9 @@ const styles = StyleSheet.create({
   tabItemActive: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  tabIcon: {
+    fontSize: 20,
   },
   footerTabText: {
     fontSize: 11,

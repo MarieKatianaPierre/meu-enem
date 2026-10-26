@@ -1,132 +1,304 @@
-// src/app/login.tsx
+
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Switch,
+  ScrollView,
+  Alert,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  Mail,
+  LockKeyhole,
+  Eye,
+  EyeOff,
+  KeyRound,
+  LogIn,
+  UserPlus,
+  BookOpen,
+} from 'lucide-react-native';
+
 import { colors } from '../theme/colors';
+
+interface Conta {
+  nome: string;
+  email: string;
+  senha: string;
+  iniciais: string;
+}
 
 export default function LoginScreen() {
   const router = useRouter();
+
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [ocultarSenha, setOcultarSenha] = useState(true);
   const [lembrarMe, setLembrarMe] = useState(false);
 
-      const handleEntrar = () => {
-    if (!email || !senha) return;
-
-    // 💾 SAUVEGARDE SÉCURISÉE DES DONNÉES DE CONNEXION (404 TEAM)
-    try {
-      // On vérifie de manière sûre si le stockage Web est disponible
-      if (typeof window !== 'undefined' && window.localStorage) {
-        // Extraction d'un nom fictif pour la démonstration MVP
-        const nomeSimulado = email.split('@')[0];
-        const nomeFormatado = nomeSimulado.charAt(0).toUpperCase() + nomeSimulado.slice(1);
-        
-        const dadosUsuario = {
-          nome: nomeFormatado,
-          email: email,
-          iniciais: nomeFormatado.substring(0, 2).toUpperCase()
-        };
-        
-        localStorage.setItem('@meu_enem_usuario', JSON.stringify(dadosUsuario));
-      }
-    } catch (error) {
-      console.error("Erro ao salvar dados do login:", error);
+  // Valida os dados antes de permitir a entrada.
+  const handleEntrar = async () => {
+    if (!email.trim() || !senha) {
+      Alert.alert(
+        'Campos obrigatórios',
+        'Digite seu e-mail e sua senha.'
+      );
+      return;
     }
 
-    // Navigue vers la Home sans encombre
-    router.replace('/home');
+    try {
+      const emailNormalizado = email.trim().toLowerCase();
+
+      // Busca as contas criadas na tela de cadastro.
+      const contasSalvas = await AsyncStorage.getItem(
+        '@meu_enem_contas'
+      );
+
+      const contas: Conta[] = contasSalvas
+        ? JSON.parse(contasSalvas)
+        : [];
+
+      // Procura uma conta com e-mail e senha correspondentes.
+      const contaEncontrada = contas.find(
+        (conta) =>
+          conta.email.trim().toLowerCase() === emailNormalizado &&
+          conta.senha === senha
+      );
+
+      // Impede a entrada de quem não possui uma conta válida.
+      if (!contaEncontrada) {
+        Alert.alert(
+          'Não foi possível entrar',
+          'E-mail ou senha incorretos. Se você ainda não tem uma conta, faça seu cadastro.'
+        );
+        return;
+      }
+
+      // Salva apenas os dados públicos do usuário conectado.
+      const dadosUsuario = {
+        nome: contaEncontrada.nome,
+        email: contaEncontrada.email,
+        iniciais: contaEncontrada.iniciais,
+      };
+
+      await AsyncStorage.setItem(
+        '@meu_enem_usuario',
+        JSON.stringify(dadosUsuario)
+      );
+
+      // Abre a página inicial após a validação.
+      router.replace('/home');
+    } catch (error) {
+      console.error('Erro ao fazer login:', error);
+
+      Alert.alert(
+        'Erro',
+        'Não foi possível realizar o login. Tente novamente.'
+      );
+    }
   };
-
-
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* 🔮 Efeito de iluminação no topo */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.glowEffect} />
 
+        {/* Cabeçalho */}
         <View style={styles.header}>
-          <Text style={styles.title}>Boas-vindas</Text>
-          <Text style={styles.subtitle}>Entre para continuar sua jornada rumo à nota 1000</Text>
-        </View>
-
-        {/* Formulário Premium */}
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>E-mail</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="exemplo@email.com"
-              placeholderTextColor={colors.textMuted}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
+          <View style={styles.logoContainer}>
+            <BookOpenIcon />
+            <Text style={styles.logoText}>Meu ENEM</Text>
           </View>
 
+          <Text style={styles.title}>Boas-vindas!</Text>
+          <Text style={styles.subtitle}>
+            Entre para continuar sua jornada rumo à nota 1000.
+          </Text>
+        </View>
+
+        {/* Formulário */}
+        <View style={styles.form}>
+          {/* E-mail */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>E-mail</Text>
+
+            <View style={styles.inputContainer}>
+              <Mail
+                size={20}
+                color={colors.textMuted}
+                strokeWidth={1.8}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="exemplo@email.com"
+                placeholderTextColor={colors.textMuted}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                accessibilityLabel="E-mail"
+              />
+            </View>
+          </View>
+
+          {/* Senha */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Senha</Text>
-            <View style={styles.passwordContainer}>
+
+            <View style={styles.inputContainer}>
+              <LockKeyhole
+                size={20}
+                color={colors.textMuted}
+                strokeWidth={1.8}
+              />
+
               <TextInput
-                style={styles.passwordInput}
-                placeholder="••••••••"
+                style={styles.input}
+                placeholder="Digite sua senha"
                 placeholderTextColor={colors.textMuted}
                 value={senha}
                 onChangeText={setSenha}
                 secureTextEntry={ocultarSenha}
                 autoCapitalize="none"
+                autoCorrect={false}
+                accessibilityLabel="Senha"
+                onSubmitEditing={handleEntrar}
+                returnKeyType="go"
               />
-              <TouchableOpacity 
-                style={styles.eyeButton} 
+
+              <TouchableOpacity
+                style={styles.eyeButton}
                 onPress={() => setOcultarSenha(!ocultarSenha)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  ocultarSenha ? 'Mostrar senha' : 'Ocultar senha'
+                }
               >
-                <Text style={styles.eyeText}>{ocultarSenha ? '👁️' : '🔒'}</Text>
+                {ocultarSenha ? (
+                  <Eye
+                    size={21}
+                    color={colors.textMuted}
+                  />
+                ) : (
+                  <EyeOff
+                    size={21}
+                    color={colors.primary}
+                  />
+                )}
               </TouchableOpacity>
             </View>
           </View>
 
-          {/* Linha de Opções: Lembrar e Esqueci */}
+          {/* Opções */}
           <View style={styles.row}>
             <View style={styles.checkboxContainer}>
               <Switch
                 value={lembrarMe}
                 onValueChange={setLembrarMe}
-                trackColor={{ false: '#2E2559', true: colors.primary }}
-                thumbColor={lembrarMe ? colors.success : '#94A3B8'}
+                trackColor={{
+                  false: '#2E2559',
+                  true: colors.primary,
+                }}
+                thumbColor={
+                  lembrarMe ? colors.success : '#94A3B8'
+                }
               />
-              <Text style={styles.checkboxLabel}>Lembrar de mim</Text>
+
+              <Text style={styles.checkboxLabel}>
+                Lembrar de mim
+              </Text>
             </View>
-            
-            <TouchableOpacity onPress={() => router.push('/recuperar')} activeOpacity={0.7}>
-              <Text style={styles.linkText}>Esqueci minha senha</Text>
+
+            <TouchableOpacity
+              style={styles.forgotButton}
+              onPress={() => router.push('/recuperar')}
+              activeOpacity={0.7}
+            >
+              <KeyRound
+                size={15}
+                color={colors.primary}
+              />
+              <Text style={styles.linkText}>
+                Esqueci minha senha
+              </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Botão de Entrada */}
-          <TouchableOpacity style={styles.button} onPress={handleEntrar} activeOpacity={0.8}>
+          {/* Botão Entrar */}
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleEntrar}
+            activeOpacity={0.8}
+          >
+            <LogIn
+              size={20}
+              color="#FFFFFF"
+              strokeWidth={2}
+            />
             <Text style={styles.buttonText}>Entrar</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Navegação para o Cadastro */}
+        {/* Link para cadastro */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Não tem uma conta? </Text>
-          <TouchableOpacity onPress={() => router.push('/cadastro')} activeOpacity={0.7}>
-            <Text style={[styles.linkText, { fontWeight: 'bold' }]}>Criar uma conta</Text>
+          <Text style={styles.footerText}>
+            Não tem uma conta?
+          </Text>
+
+          <TouchableOpacity
+            style={styles.createAccount}
+            onPress={() => router.push('/cadastro')}
+            activeOpacity={0.7}
+          >
+            <UserPlus
+              size={17}
+              color={colors.primary}
+            />
+            <Text style={styles.linkText}>
+              Criar uma conta
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
 
-      {/* 🦶 Rodapé Fixo de Créditos do Grupo na Base */}
+      {/* Créditos do grupo */}
       <View style={styles.creditsFooter}>
         <Text style={styles.creditsFooterText}>
-          Criado e desenvolvido pelo grupo <Text style={styles.groupHighlight}>404 TEAM</Text>
+          Criado e desenvolvido pelo grupo{' '}
+          <Text style={styles.groupHighlight}>TEAM 404</Text>
         </Text>
       </View>
     </View>
+  );
+}
+
+// Ícone da marca
+function BookOpenIcon() {
+  return (
+    <View style={styles.logoIcon}>
+      <MailBookIcon />
+    </View>
+  );
+}
+
+function MailBookIcon() {
+  return (
+    <BookOpen
+      size={25}
+      color="#FFFFFF"
+      strokeWidth={1.8}
+    />
   );
 }
 
@@ -138,7 +310,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     padding: 24,
-    paddingBottom: 70, // Espaço confortável para o conteúdo rolável não bater no rodapé fixo
+    paddingBottom: 80,
     justifyContent: 'center',
   },
   glowEffect: {
@@ -152,8 +324,28 @@ const styles = StyleSheet.create({
     opacity: 0.1,
   },
   header: {
-    marginBottom: 40,
-    marginTop: 40, // 🔋 Afasta confortavelmente os ícones de bateria e notificações do Android
+    marginBottom: 36,
+    marginTop: 40,
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 32,
+  },
+  logoIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoText: {
+    fontSize: 19,
+    fontWeight: '800',
+    color: colors.textMain,
+    letterSpacing: 0.2,
   },
   title: {
     fontSize: 32,
@@ -180,61 +372,53 @@ const styles = StyleSheet.create({
     color: colors.textMain,
     marginBottom: 8,
   },
-  input: {
-    width: '100%',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: colors.radius,
-    padding: 16,
-    fontSize: 15,
-    color: colors.textMain,
-  },
-  /* 📐 Altura travada em 56px para alinhar perfeitamente com o campo de E-mail */
-  passwordContainer: {
+  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: colors.radius,
-    width: '100%',
-    height: 56, 
+    paddingHorizontal: 15,
+    minHeight: 56,
   },
-  passwordInput: {
+  input: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     fontSize: 15,
     color: colors.textMain,
   },
   eyeButton: {
-    paddingHorizontal: 16,
+    padding: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    height: '100%',
-  },
-  eyeText: {
-    fontSize: 16,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 32,
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: 28,
     marginTop: 4,
   },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   checkboxLabel: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.textMuted,
   },
+  forgotButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
   linkText: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.primary,
     fontWeight: '600',
   },
@@ -244,6 +428,9 @@ const styles = StyleSheet.create({
     borderRadius: colors.radius,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    minHeight: 54,
     boxShadow: '0px 4px 14px rgba(99, 102, 241, 0.3)',
   },
   buttonText: {
@@ -252,32 +439,39 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 40,
+    alignItems: 'center',
+    marginTop: 32,
+    gap: 12,
   },
   footerText: {
     fontSize: 14,
     color: colors.textMuted,
   },
-  /* 🦶 Estilos da Barra Fixa com Assinatura da Equipe */
+  createAccount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    padding: 5,
+  },
   creditsFooter: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 50,
+    minHeight: 50,
     backgroundColor: colors.bg,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 12,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(46, 37, 89, 0.3)', // Borda sutil combinando com o tema escuro
+    borderTopColor: 'rgba(46, 37, 89, 0.3)',
   },
   creditsFooterText: {
     color: colors.textMuted,
     fontSize: 11,
     fontWeight: '500',
     letterSpacing: 0.3,
+    textAlign: 'center',
   },
   groupHighlight: {
     color: '#FFFFFF',

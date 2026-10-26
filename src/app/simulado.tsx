@@ -4,6 +4,13 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { useRouter } from 'expo-router';
 import { colors } from '../theme/colors';
 
+import {
+   Home,
+  BookOpen,
+  ClipboardList,
+  UserRound, 
+} from 'lucide-react-native';
+
 interface Alternativa {
   letra: string;
   texto: string;
@@ -147,22 +154,22 @@ export default function SimulatedScreen() {
       {/* Rodapé de Navegação Fixo */}
       <View style={styles.tabBarFixed}>
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/home')}>
-          <Text style={{ fontSize: 20 }}>🏠</Text>
+          <Home color={colors.textMuted} size={22} />
           <Text style={styles.footerTabText}>Home</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/materias')}>
-          <Text style={{ fontSize: 20 }}>📚</Text>
+           <BookOpen color={colors.primary} size={22} />
           <Text style={styles.footerTabText}>Estudos</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItemActive}>
-          <Text style={{ fontSize: 20 }}>📝</Text>
+          <ClipboardList color={colors.textMuted} size={22} />
           <Text style={styles.footerTabTextActive}>Simulado</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/perfil')}>
-          <Text style={{ fontSize: 20 }}>👤</Text>
+          <UserRound color={colors.primary} size={22} />
           <Text style={styles.footerTabText}>Perfil</Text>
         </TouchableOpacity>
       </View>

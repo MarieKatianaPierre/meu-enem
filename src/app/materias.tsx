@@ -1,99 +1,345 @@
-// src/app/materias.tsx
+
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import {
+  BookOpen,
+  Calculator,
+  Languages,
+  Palette,
+  Dumbbell,
+  Monitor,
+  FlaskConical,
+  Atom,
+  Beaker,
+  Landmark,
+  Globe,
+  Brain,
+  Users,
+  ChevronRight,
+  House,
+  ClipboardList,
+  UserRound,
+  RotateCcw,
+} from 'lucide-react-native';
+
 import { colors } from '../theme/colors';
 
-type MateriaKey = 'port' | 'mat' | 'bio' | 'hist';
+// As 14 disciplinas e seus principais assuntos
+const materias = [
+  {
+    id: 'port',
+    nome: 'Português',
+    Icone: BookOpen,
+    assuntos: [
+      'Interpretação de texto',
+      'Gramática',
+      'Gêneros textuais',
+      'Funções da linguagem',
+      'Variação linguística',
+      'Argumentação',
+    ],
+  },
+  {
+    id: 'mat',
+    nome: 'Matemática',
+    Icone: Calculator,
+    assuntos: [
+      'Porcentagem',
+      'Regra de três',
+      'Funções',
+      'Geometria',
+      'Estatística',
+      'Probabilidade',
+    ],
+  },
+  {
+    id: 'lit',
+    nome: 'Literatura',
+    Icone: BookOpen,
+    assuntos: [
+      'Escolas literárias',
+      'Modernismo',
+      'Romantismo',
+      'Realismo',
+      'Interpretação literária',
+    ],
+  },
+  {
+    id: 'lingua',
+    nome: 'Língua Estrangeira',
+    Icone: Languages,
+    assuntos: [
+      'Interpretação de textos',
+      'Vocabulário',
+      'Gramática contextual',
+      'Inglês ou Espanhol',
+    ],
+  },
+  {
+    id: 'artes',
+    nome: 'Artes',
+    Icone: Palette,
+    assuntos: [
+      'Arte brasileira',
+      'Arte contemporânea',
+      'Movimentos artísticos',
+      'Música e teatro',
+    ],
+  },
+  {
+    id: 'edfis',
+    nome: 'Educação Física',
+    Icone: Dumbbell,
+    assuntos: [
+      'Esporte e sociedade',
+      'Corpo e saúde',
+      'Práticas corporais',
+      'Cultura corporal',
+    ],
+  },
+  {
+    id: 'tic',
+    nome: 'Tecnologia e Comunicação',
+    Icone: Monitor,
+    assuntos: [
+      'Linguagem digital',
+      'Mídias e sociedade',
+      'Tecnologias da informação',
+      'Comunicação digital',
+    ],
+  },
+  {
+    id: 'bio',
+    nome: 'Biologia',
+    Icone: FlaskConical,
+    assuntos: [
+      'Citologia',
+      'Genética',
+      'Ecologia',
+      'Evolução',
+      'Fisiologia',
+    ],
+  },
+  {
+    id: 'fis',
+    nome: 'Física',
+    Icone: Atom,
+    assuntos: [
+      'Mecânica',
+      'Eletricidade',
+      'Ondulatória',
+      'Termologia',
+      'Óptica',
+    ],
+  },
+  {
+    id: 'qui',
+    nome: 'Química',
+    Icone: Beaker,
+    assuntos: [
+      'Química orgânica',
+      'Estequiometria',
+      'Soluções',
+      'Ligações químicas',
+      'Eletroquímica',
+    ],
+  },
+  {
+    id: 'hist',
+    nome: 'História',
+    Icone: Landmark,
+    assuntos: [
+      'Brasil Colônia',
+      'Brasil Império',
+      'República',
+      'Era Vargas',
+      'Ditadura Militar',
+      'História Geral',
+    ],
+  },
+  {
+    id: 'geo',
+    nome: 'Geografia',
+    Icone: Globe,
+    assuntos: [
+      'Geografia do Brasil',
+      'Globalização',
+      'Clima e vegetação',
+      'Urbanização',
+      'Cartografia',
+    ],
+  },
+  {
+    id: 'fil',
+    nome: 'Filosofia',
+    Icone: Brain,
+    assuntos: [
+      'Ética',
+      'Política',
+      'Filosofia antiga',
+      'Conhecimento',
+      'Filosofia moderna',
+    ],
+  },
+  {
+    id: 'soc',
+    nome: 'Sociologia',
+    Icone: Users,
+    assuntos: [
+      'Cultura e sociedade',
+      'Desigualdade social',
+      'Cidadania',
+      'Trabalho',
+      'Movimentos sociais',
+    ],
+  },
+];
 
-export default function ContentScreen() {
+export default function MateriasScreen() {
   const router = useRouter();
-  const [materiaAtiva, setMateriaAtiva] = useState<MateriaKey>('port');
 
-  // Base de données locale pour la version MVP du groupe 404 TEAM
-  const bancoDados: Record<MateriaKey, string[]> = {
-    port: ["Interpretação de texto", "Gramática", "Gêneros textuais", "Funções da linguagem"],
-    mat: ["Porcentagem", "Regra de três", "Funções", "Geometria", "Estatística", "Probabilidade"],
-    bio: ["Citologia", "Genética", "Ecologia", "Evolução", "Fisiologia"],
-    hist: ["Brasil Colônia", "Brasil Império", "República", "Era Vargas", "Ditadura Militar", "História Geral"]
-  };
+  // Guarda a disciplina selecionada.
+  // Quando for null, mostra todas as matérias.
+  const [materiaAtiva, setMateriaAtiva] = useState<string | null>(null);
+
+  const materiaSelecionada = materias.find(
+    (materia) => materia.id === materiaAtiva
+  );
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.brand}>Meu ENEM</Text>
+
         <View style={styles.header}>
-          <Text style={styles.title}>Conteúdos Base</Text>
-          <Text style={styles.subtitle}>Escolha uma disciplina para listar os tópicos focados</Text>
+          <Text style={styles.title}>
+            {materiaSelecionada
+              ? materiaSelecionada.nome
+              : 'Matérias'}
+          </Text>
+
+          <Text style={styles.subtitle}>
+            {materiaSelecionada
+              ? 'Escolha um assunto para estudar.'
+              : 'Escolha uma disciplina para começar seus estudos.'}
+          </Text>
         </View>
 
-        {/* Menu horizontal de sélection de matières */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
-          <TouchableOpacity 
-            style={[styles.tabButton, materiaAtiva === 'port' && styles.tabButtonActive]}
-            onPress={() => setMateriaAtiva('port')}
-          >
-            <Text style={[styles.tabText, materiaAtiva === 'port' && styles.tabTextActive]}>📝 Português</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.tabButton, materiaAtiva === 'mat' && styles.tabButtonActive]}
-            onPress={() => setMateriaAtiva('mat')}
-          >
-            <Text style={[styles.tabText, materiaAtiva === 'mat' && styles.tabTextActive]}>📐 Matemática</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.tabButton, materiaAtiva === 'bio' && styles.tabButtonActive]}
-            onPress={() => setMateriaAtiva('bio')}
-          >
-            <Text style={[styles.tabText, materiaAtiva === 'bio' && styles.tabTextActive]}>🔬 Biologia</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.tabButton, materiaAtiva === 'hist' && styles.tabButtonActive]}
-            onPress={() => setMateriaAtiva('hist')}
-          >
-            <Text style={[styles.tabText, materiaAtiva === 'hist' && styles.tabTextActive]}>🌎 História</Text>
-          </TouchableOpacity>
-        </ScrollView>
-
-        {/* Liste dynamique des sujets injectés */}
-        <Text style={styles.sectionTitle}>Assuntos mais recorrentes</Text>
-        <View style={styles.listContainer}>
-          {bancoDados[materiaAtiva].map((assunto, index) => (
-            <TouchableOpacity key={index} style={styles.topicCard} activeOpacity={0.7}>
-              <View style={styles.topicLeft}>
-                <View style={styles.bulletPoint} />
-                <Text style={styles.topicName}>{assunto}</Text>
-              </View>
-              <Text style={styles.arrowIcon}>➔</Text>
+        {materiaSelecionada ? (
+          <View>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => setMateriaAtiva(null)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.backButtonText}>
+                ‹  Todas as matérias
+              </Text>
             </TouchableOpacity>
-          ))}
-        </View>
 
+            {materiaSelecionada.assuntos.map((assunto) => (
+              <TouchableOpacity
+                key={assunto}
+                style={styles.topicCard}
+                activeOpacity={0.75}
+                onPress={() =>
+                  router.push({
+                    pathname: '/estudo',
+                    params: {
+                      materia: materiaSelecionada.nome,
+                      assunto,
+                    },
+                  })
+                }
+              >
+                <Text style={styles.topicName}>{assunto}</Text>
+                <ChevronRight color={colors.primary} size={20} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : (
+          <FlatList
+            data={materias}
+            keyExtractor={(item) => item.id}
+            numColumns={2}
+            scrollEnabled={false}
+            columnWrapperStyle={styles.gridRow}
+            renderItem={({ item }) => {
+              const Icone = item.Icone;
+
+              return (
+                <TouchableOpacity
+                  style={styles.subjectCard}
+                  activeOpacity={0.75}
+                  onPress={() => setMateriaAtiva(item.id)}
+                >
+                  <View style={styles.iconContainer}>
+                    <Icone
+                      color={colors.primary}
+                      size={27}
+                      strokeWidth={1.8}
+                    />
+                  </View>
+
+                  <Text style={styles.subjectName}>
+                    {item.nome}
+                  </Text>
+
+                  <View style={styles.cardFooter}>
+                    <Text style={styles.cardLink}>Ver assuntos</Text>
+                    <ChevronRight
+                      color={colors.primary}
+                      size={16}
+                    />
+                  </View>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        )}
       </ScrollView>
 
-      {/* Barre de navigation du bas fixe */}
-      <View style={styles.tabBarFixed}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/home')}>
-          <Text style={{ fontSize: 20 }}>🏠</Text>
-          <Text style={styles.footerTabText}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.tabItemActive}>
-          <Text style={{ fontSize: 20 }}>📚</Text>
-          <Text style={styles.footerTabTextActive}>Estudos</Text>
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('/home')}
+        >
+          <House color={colors.textMuted} size={22} />
+          <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/simulado')}>
-          <Text style={{ fontSize: 20 }}>📝</Text>
-          <Text style={styles.footerTabText}>Simulado</Text>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => setMateriaAtiva(null)}
+        >
+          <BookOpen color={colors.primary} size={22} />
+          <Text style={styles.navTextActive}>Estudos</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/perfil')}>
-          <Text style={{ fontSize: 20 }}>👤</Text>
-          <Text style={styles.footerTabText}>Perfil</Text>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('/simulado')}
+        >
+          <ClipboardList color={colors.textMuted} size={22} />
+          <Text style={styles.navText}>Simulados</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => router.push('/perfil')}
+        >          <UserRound color={colors.textMuted} size={22} />
+          <Text style={styles.navText}>Perfil</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -101,141 +347,131 @@ export default function ContentScreen() {
 }
 
 const styles = StyleSheet.create({
-  // Estrutura principal da tela
-  container: { 
-    flex: 1, 
-    backgroundColor: colors.bg 
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
   },
-  
-  // Área rolável do conteúdo
-  scrollContent: { 
-    padding: 24, 
-    paddingBottom: 100 
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 105,
   },
-  
-  // Cabeçalho da tela
-  header: { 
-    marginTop: 20, 
-    marginBottom: 24 
+  brand: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginBottom: 22,
   },
-  title: { 
-    fontSize: 26, 
-    fontWeight: '800', 
-    color: colors.textMain, 
-    letterSpacing: -0.5 
+  header: {
+    marginBottom: 22,
   },
-  subtitle: { 
-    fontSize: 14, 
-    color: colors.textMuted, 
-    marginTop: 4, 
-    lineHeight: 20 
+  title: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: colors.textMain,
   },
-  
-  // Menu horizontal de matérias (Abas)
-  tabsContainer: { 
-    flexDirection: 'row', 
-    marginBottom: 20, 
-    paddingBottom: 4 
+  subtitle: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.textMuted,
+    marginTop: 6,
   },
-  tabButton: { 
-    paddingVertical: 10, 
-    paddingHorizontal: 16, 
-    backgroundColor: colors.surface, 
-    borderRadius: 20, 
-    marginRight: 8, 
-    borderWidth: 1, 
-    borderColor: colors.border 
+  gridRow: {
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
-  tabButtonActive: { 
-    backgroundColor: colors.primary, 
-    borderColor: colors.primary 
+  subjectCard: {
+    width: '48.3%',
+    minHeight: 150,
+    padding: 13,
+    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    justifyContent: 'space-between',
   },
-  tabText: { 
-    color: colors.textMuted, 
-    fontWeight: '600', 
-    fontSize: 14 
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: '#06B6D418',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
   },
-  tabTextActive: { 
-    color: '#FFFFFF', 
-    fontWeight: 'bold' 
+  subjectName: {
+    color: colors.textMain,
+    fontSize: 14,
+    fontWeight: '700',
+    lineHeight: 19,
+    minHeight: 38,
   },
-  
-  // Lista de tópicos e assuntos
-  sectionTitle: { 
-    fontSize: 16, 
-    fontWeight: '700', 
-    color: colors.textMain, 
-    marginBottom: 12 
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
   },
-  listContainer: { 
-    gap: 8 
+  cardLink: {
+    color: colors.textMuted,
+    fontSize: 11,
   },
-  
-  // 💻 CARD CORRIGIDO E LIMPO (Sem justifycontent duplicado)
-  topicCard: { 
-    backgroundColor: colors.surface, 
-    borderWidth: 1, 
-    borderColor: colors.border, 
-    borderRadius: colors.radius, 
-    padding: 18, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'space-between' 
+  backButton: {
+    marginBottom: 16,
+    paddingVertical: 10,
   },
-  topicLeft: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    gap: 12 
+  backButtonText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '700',
   },
-  bulletPoint: { 
-    width: 6, 
-    height: 6, 
-    borderRadius: 3, 
-    backgroundColor: colors.primary 
+  topicCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 14,
+    padding: 17,
+    marginBottom: 10,
   },
-  topicName: { 
-    fontSize: 15, 
-    fontWeight: '600', 
-    color: colors.textMain 
+  topicName: {
+    color: colors.textMain,
+    fontSize: 14,
+    fontWeight: '600',
+    flex: 1,
+    marginRight: 12,
   },
-  arrowIcon: { 
-    fontSize: 14, 
-    color: colors.primary, 
-    fontWeight: 'bold' 
+  bottomBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    minHeight: 72,
+    paddingBottom: 8,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
-  
-  // 🦶 Rodapé de Navegação Fixo Inferior
-  tabBarFixed: { 
-    position: 'absolute', 
-    bottom: 0, 
-    left: 0, 
-    right: 0, 
-    height: 72, 
-    backgroundColor: colors.surface, 
-    borderTopWidth: 1, 
-    borderTopColor: colors.border, 
-    flexDirection: 'row', 
-    justifyContent: 'space-around', 
-    alignItems: 'center' 
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingTop: 10,
   },
-  tabItem: { 
-    alignItems: 'center', 
-    justifyContent: 'center' 
+  navText: {
+    color: colors.textMuted,
+    fontSize: 10,
+    fontWeight: '600',
   },
-  tabItemActive: { 
-    alignItems: 'center', 
-    justifyContent: 'center' 
-  },
-  footerTabText: { 
-    fontSize: 11, 
-    color: colors.textMuted, 
-    fontWeight: '600', 
-    marginTop: 4 
-  },
-  footerTabTextActive: { 
-    fontSize: 11, 
-    color: colors.primary, 
-    fontWeight: 'bold', 
-    marginTop: 4 
+  navTextActive: {
+    color: colors.primary,
+    fontSize: 10,
+    fontWeight: '800',
   },
 });

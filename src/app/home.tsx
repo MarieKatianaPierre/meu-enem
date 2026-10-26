@@ -2,6 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { BookOpen,
+  CalendarDays,
+  RotateCcw,
+  UserRound,
+  ClipboardList,
+  House,
+  ChevronRight,
+  Target,
+  ChartNoAxesColumnIncreasing,
+  Home, } from 'lucide-react-native';
+
 import { colors } from '../theme/colors';
 
 export default function HomeScreen() {
@@ -87,32 +98,32 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Funcionalidades principais</Text>
         <View style={styles.menuGrid}>
           <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/materias')}>
-            <Text style={styles.menuIcon}>📚</Text>
+            <BookOpen size={26} color={colors.primary} />
             <Text style={styles.menuName}>Conteúdos</Text>
             <Text style={styles.menuDesc}>Assuntos e tópicos</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/cronograma')}>
-            <Text style={styles.menuIcon}>📅</Text>
+            <CalendarDays size={26} color={colors.primary} />
             <Text style={styles.menuName}>Cronograma</Text>
             <Text style={styles.menuDesc}>Suas metas e datas</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/revisoes')}>
-            <Text style={styles.menuIcon}>🔄</Text>
+            <RotateCcw size={26} color={colors.primary} />
             <Text style={styles.menuName}>Revisões</Text>
             <Text style={styles.menuDesc}>Materiais e resumos</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuCard} onPress={() => router.push('/perfil')}>
-            <Text style={styles.menuIcon}>👤</Text>
+            <UserRound size={26} color={colors.primary} />
             <Text style={styles.menuName}>Meu Perfil</Text>
             <Text style={styles.menuDesc}>Estatísticas e conta</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.simuladoButton} onPress={() => router.push('/simulado')}>
             <View style={styles.simuladoLeft}>
-              <Text style={{ fontSize: 28 }}>📝</Text>
+              <ClipboardList size={28} color={colors.primary} />
               <View>
                 <Text style={styles.simuladoTitle}>Simulados e Questões</Text>
                 <Text style={styles.simuladoSubtitle}>Responda e veja este painel atualizar na hora!</Text>
@@ -127,22 +138,22 @@ export default function HomeScreen() {
       {/* Rodapé Fixo */}
       <View style={styles.tabBarFixed}>
         <TouchableOpacity style={styles.tabItemActive}>
-          <Text style={{ fontSize: 20 }}>🏠</Text>
+          <Home size={26} color={colors.primary} />
           <Text style={styles.tabTextActive}>Home</Text>
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/materias')}>
-          <Text style={{ fontSize: 20 }}>📚</Text>
+          <BookOpen size={26} color={colors.primary} />
           <Text style={styles.tabText}>Estudos</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/simulado')}>
-          <Text style={{ fontSize: 20 }}>📝</Text>
+          <ClipboardList size={28} color={colors.primary} />
           <Text style={styles.tabText}>Simulado</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/perfil')}>
-          <Text style={{ fontSize: 20 }}>👤</Text>
+          <UserRound size={26} color={colors.primary} />
           <Text style={styles.tabText}>Perfil</Text>
         </TouchableOpacity>
       </View>

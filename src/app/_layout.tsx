@@ -22,6 +22,7 @@ export default function RootLayout() {
         <Stack.Screen name="cadastro" />
         <Stack.Screen name="recuperar" />
         <Stack.Screen name="home" />
+        <Stack.Screen name="estudo" />
       </Stack>
     </>
   );
