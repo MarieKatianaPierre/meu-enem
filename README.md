@@ -51,6 +51,29 @@ A Inteligência Artificial tem como objetivo auxiliar o estudante durante os est
 
 Permite que o estudante pratique por meio de questões e simulados, ajudando na preparação para o ENEM e no acompanhamento do desempenho.
 
+
+### 👤 Cadastro e perfil do usuário
+
+O aplicativo permite que o usuário selecione seu tipo de perfil durante o cadastro:
+
+- **Aluno:** para estudantes que utilizam o aplicativo na preparação para o ENEM.
+- **Professor:** para professores que desejam utilizar os recursos disponíveis no aplicativo.
+- **Outro:** para usuários que não se enquadram nas opções anteriores.
+
+O tipo de usuário selecionado pode ser apresentado na página de perfil, facilitando a identificação da categoria escolhida durante o cadastro.
+
+### 💬 Comentários e sugestões
+
+O Meu ENEM conta com uma página destinada a comentários e sugestões dos usuários.
+
+O objetivo é permitir que os usuários compartilhem opiniões, apresentem sugestões de melhorias e contribuam para a evolução do aplicativo.
+
+A funcionalidade está sendo preparada para permitir que os comentários sejam compartilhados entre os usuários por meio de uma integração com um serviço de backend e banco de dados.
+
+**Observação:** o compartilhamento entre diferentes usuários depende da implementação e da integração desse serviço.
+
+
+
 ---
 
 ## 🛠️ Tecnologias utilizadas
@@ -60,6 +83,10 @@ O projeto foi desenvolvido utilizando tecnologias voltadas para desenvolvimento 
 ### React Native
 
 Framework utilizado para desenvolvimento da aplicação mobile utilizando JavaScript/TypeScript e componentes nativos.
+
+### Lucide React Native
+
+ícones da interface.
 
 ### Expo
 
@@ -89,20 +116,26 @@ A estrutura principal do projeto utiliza o Expo Router.
 
 ```text
 meu-enem/
-│
 ├── assets/
 │   └── images/
-│       └── logo.png
-│
 ├── src/
-│   └── app/
-│       └── index.tsx
-│
+│   ├── app/
+│   │   ├── index.tsx
+│   │   ├── login.tsx
+│   │   ├── cadastro.tsx
+│   │   ├── recuperar.tsx
+│   │   ├── home.tsx
+│   │   ├── materias.tsx
+│   │   ├── estudo.tsx
+│   │   ├── cronograma.tsx
+│   │   ├── revisoes.tsx
+│   │   ├── simulado.tsx
+│   │   ├── perfil.tsx
+│   │   └── comentarios.tsx
+│   └── theme/
+│       └── colors.ts
 ├── package.json
-├── app.json
-├── tsconfig.json
-├── README.md
-└── ...
+└── README.md
 ```
 
 ### `src/app`
@@ -124,6 +157,10 @@ Contém configurações do aplicativo Expo.
 ### `README.md`
 
 Documento com informações e instruções sobre o projeto.
+
+### AsyncStorage
+
+Biblioteca utilizada para armazenar dados localmente no dispositivo, como informações do usuário e outros dados da aplicação.
 
 ---
 
