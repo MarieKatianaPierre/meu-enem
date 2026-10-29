@@ -343,6 +343,7 @@ const handleSairDaConta = async () => {
   );
 }
 
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

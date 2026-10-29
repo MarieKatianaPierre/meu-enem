@@ -1,4 +1,4 @@
-// src/app/_layout.tsx
+
 import React from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -6,23 +6,24 @@ import { StatusBar } from 'expo-status-bar';
 export default function RootLayout() {
   return (
     <>
-      {/* Força a barra de bateria/horas do celular a ficar clara por causa do tema Dark */}
+      {/* Mantém os ícones da barra de status claros no tema escuro */}
       <StatusBar style="light" />
-      
-      {/* Gerenciador de Pilha de Telas (Navegação) */}
+
+      {/* Gerenciador de navegação entre as telas */}
       <Stack
         screenOptions={{
-          headerShown: false, // Esconde aquela barra preta feia com o título no topo do app
-          animation: 'fade',  // Transição suave estilo premium ao mudar de tela
+          headerShown: false,
+          animation: 'fade',
         }}
       >
-        {/* Define a ordem e a existência das telas no sistema */}
+        {/* Telas do aplicativo Meu ENEM */}
         <Stack.Screen name="index" />
         <Stack.Screen name="login" />
         <Stack.Screen name="cadastro" />
         <Stack.Screen name="recuperar" />
         <Stack.Screen name="home" />
         <Stack.Screen name="estudo" />
+        <Stack.Screen name="comentarios" />
       </Stack>
     </>
   );

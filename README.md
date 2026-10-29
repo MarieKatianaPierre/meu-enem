@@ -162,6 +162,7 @@ Documento com informações e instruções sobre o projeto.
 
 Biblioteca utilizada para armazenar dados localmente no dispositivo, como informações do usuário e outros dados da aplicação.
 
+npx expo export --platform web
 ---
 
 ## 💻 Como executar o projeto

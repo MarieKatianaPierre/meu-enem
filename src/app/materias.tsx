@@ -28,11 +28,12 @@ import {
   ClipboardList,
   UserRound,
   RotateCcw,
+  PenTool,
 } from 'lucide-react-native';
 
 import { colors } from '../theme/colors';
 
-// As 14 disciplinas e seus principais assuntos
+// As 15 disciplinas e seus principais assuntos
 const materias = [
   {
     id: 'port',
@@ -201,6 +202,15 @@ const materias = [
       'Movimentos sociais',
     ],
   },
+    {
+    id: 'red',
+    nome: 'Redação',
+    Icone: PenTool, // Ou Edit3, FileText, dependendo dos ícones que você importou do lucide-react
+    assuntos: [
+      'Texto dissertativo-argumentativo',
+    ],
+  },
+
 ];
 
 export default function MateriasScreen() {
@@ -338,8 +348,14 @@ export default function MateriasScreen() {
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => router.push('/perfil')}
-        >          <UserRound color={colors.textMuted} size={22} />
-          <Text style={styles.navText}>Perfil</Text>
+        >          
+        <UserRound 
+        color={colors.textMuted} 
+        size={22} />
+
+          <Text style={styles.navText}>
+            Perfil
+            </Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -1,13 +1,16 @@
 
-import React, { useState } from 'react';
+
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect, useRouter } from 'expo-router';
 import {
   BookOpen,
   CalendarDays,
@@ -20,33 +23,20 @@ import {
   FlaskConical,
   Landmark,
   Lightbulb,
+  ChevronRight,
 } from 'lucide-react-native';
 
 import { colors } from '../theme/colors';
 
-const revisoesAgendadas = [
-  {
-    id: 1,
-    titulo: 'Porcentagem e Proporção',
-    materia: 'Matemática',
-    prazo: 'Revisar amanhã',
-    status: 'urgente',
-  },
-  {
-    id: 2,
-    titulo: 'Cadeias Alimentares e Ecologia',
-    materia: 'Biologia',
-    prazo: 'Em 7 dias',
-    status: 'agendado',
-  },
-  {
-    id: 3,
-    titulo: 'Era Vargas e Estado Novo',
-    materia: 'História',
-    prazo: 'Em 30 dias',
-    status: 'agendado',
-  },
-];
+const CHAVE_REVISOES = '@meu_enem_revisoes';
+
+type Revisao = {
+  id: string;
+  materia: string;
+  assunto: string;
+  concluida: boolean;
+  dataConclusao: string;
+};
 
 function IconeMateria({ materia }: { materia: string }) {
   switch (materia) {
@@ -63,19 +53,75 @@ function IconeMateria({ materia }: { materia: string }) {
 
 export default function RevisionScreen() {
   const router = useRouter();
-  const [concluidas, setConcluidas] = useState<number[]>([]);
 
-  const alternarConclusao = (id: number) => {
-    setConcluidas((anteriores) =>
-      anteriores.includes(id)
-        ? anteriores.filter((itemId) => itemId !== id)
-        : [...anteriores, id]
-    );
+  const [revisoes, setRevisoes] = useState<Revisao[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [alterandoId, setAlterandoId] = useState<string | null>(null);
+
+  // Carrega novamente a lista sempre que o aluno abrir esta página.
+  const carregarRevisoes = useCallback(async () => {
+    try {
+      setCarregando(true);
+
+      const dados = await AsyncStorage.getItem(CHAVE_REVISOES);
+      const lista: Revisao[] = dados ? JSON.parse(dados) : [];
+
+      setRevisoes(Array.isArray(lista) ? lista : []);
+    } catch (erro) {
+      console.error('Erro ao carregar revisões:', erro);
+      setRevisoes([]);
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      carregarRevisoes();
+    }, [carregarRevisoes])
+  );
+
+  // Salva o estado da revisão para continuar marcado ao reabrir o app.
+  const alternarConclusao = async (id: string) => {
+    if (alterandoId) return;
+
+    setAlterandoId(id);
+
+    try {
+      const atualizadas = revisoes.map((item) =>
+        item.id === id
+          ? { ...item, concluida: !item.concluida }
+          : item
+      );
+
+      await AsyncStorage.setItem(
+        CHAVE_REVISOES,
+        JSON.stringify(atualizadas)
+      );
+
+      setRevisoes(atualizadas);
+    } catch (erro) {
+      console.error('Erro ao atualizar revisão:', erro);
+    } finally {
+      setAlterandoId(null);
+    }
   };
 
-  const progresso = Math.round(
-    (concluidas.length / revisoesAgendadas.length) * 100
-  );
+  const abrirLicao = (item: Revisao) => {
+    router.push({
+      pathname: '/estudo',
+      params: {
+        materia: item.materia,
+        assunto: item.assunto,
+      },
+    });
+  };
+
+  const total = revisoes.length;
+  const totalConcluidas = revisoes.filter((item) => item.concluida).length;
+
+  const progresso =
+    total > 0 ? Math.round((totalConcluidas / total) * 100) : 0;
 
   return (
     <View style={styles.container}>
@@ -100,7 +146,7 @@ export default function RevisionScreen() {
             <View>
               <Text style={styles.progressTitle}>Seu progresso</Text>
               <Text style={styles.progressSubtitle}>
-                {concluidas.length} de {revisoesAgendadas.length} revisões concluídas
+                {totalConcluidas} de {total} revisões concluídas
               </Text>
             </View>
 
@@ -122,106 +168,132 @@ export default function RevisionScreen() {
           <View style={styles.sectionHeading}>
             <Text style={styles.sectionTitle}>Lista de revisões</Text>
             <Text style={styles.sectionSubtitle}>
-              Assuntos para reforçar sua memória
+              Assuntos que você concluiu e pode revisar novamente
             </Text>
           </View>
         </View>
 
-        <View style={styles.listContainer}>
-          {revisoesAgendadas.map((item) => {
-            const concluida = concluidas.includes(item.id);
+        {carregando ? (
+          <View style={styles.estadoContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={styles.estadoTexto}>Carregando revisões...</Text>
+          </View>
+        ) : revisoes.length === 0 ? (
+          <View style={styles.estadoContainer}>
+            <BookOpen size={36} color={colors.primary} />
 
-            return (
-              <View key={item.id} style={styles.revisionCard}>
-                <View style={styles.revisionMain}>
-                  <View style={styles.subjectIcon}>
-                    <IconeMateria materia={item.materia} />
-                  </View>
+            <Text style={styles.vazioTitulo}>
+              Nenhum assunto para revisar
+            </Text>
 
-                  <View style={styles.revisionContent}>
-                    <Text style={styles.materiaLabel}>
-                      {item.materia}
-                    </Text>
+            <Text style={styles.estadoTexto}>
+              Entre em Matérias, estude um assunto e toque em
+              “Concluir estudo”. Ele aparecerá aqui automaticamente.
+            </Text>
 
-                    <Text
-                      style={[
-                        styles.cardTitle,
-                        concluida && styles.cardTitleConcluido,
-                      ]}
-                    >
-                      {item.titulo}
-                    </Text>
+            <TouchableOpacity
+              style={styles.acaoButton}
+              onPress={() => router.push('/materias')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.acaoButtonTexto}>Ir para Matérias</Text>
+              <ChevronRight size={18} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.listContainer}>
+            {revisoes.map((item) => {
+              const concluida = item.concluida;
 
-                    <View
-                      style={[
-                        styles.badge,
-                        concluida
-                          ? styles.badgeConcluido
-                          : item.status === 'urgente'
-                            ? styles.badgeUrgente
-                            : styles.badgeAgendado,
-                      ]}
-                    >
-                      {concluida ? (
-                        <CheckCircle2 size={14} color="#16804A" />
-                      ) : (
-                        <Clock3
-                          size={14}
-                          color={
-                            item.status === 'urgente'
-                              ? colors.danger
-                              : colors.primary
-                          }
-                        />
-                      )}
+              return (
+                <View key={item.id} style={styles.revisionCard}>
+                  <View style={styles.revisionMain}>
+                    <View style={styles.subjectIcon}>
+                      <IconeMateria materia={item.materia} />
+                    </View>
+
+                    <View style={styles.revisionContent}>
+                      <Text style={styles.materiaLabel}>
+                        {item.materia}
+                      </Text>
 
                       <Text
                         style={[
-                          styles.badgeText,
-                          concluida
-                            ? styles.textConcluido
-                            : item.status === 'urgente'
-                              ? styles.textUrgente
-                              : styles.textAgendado,
+                          styles.cardTitle,
+                          concluida && styles.cardTitleConcluido,
                         ]}
                       >
-                        {concluida ? 'Concluída' : item.prazo}
+                        {item.assunto}
                       </Text>
+
+                      <View
+                        style={[
+                          styles.badge,
+                          concluida
+                            ? styles.badgeConcluido
+                            : styles.badgeAgendado,
+                        ]}
+                      >
+                        {concluida ? (
+                          <CheckCircle2 size={14} color="#16804A" />
+                        ) : (
+                          <Clock3 size={14} color={colors.primary} />
+                        )}
+
+                        <Text
+                          style={[
+                            styles.badgeText,
+                            concluida
+                              ? styles.textConcluido
+                              : styles.textAgendado,
+                          ]}
+                        >
+                          {concluida ? 'Revisão concluída' : 'Pendente'}
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                </View>
 
-                <TouchableOpacity
-                  style={[
-                    styles.completeButton,
-                    concluida && styles.completeButtonActive,
-                  ]}
-                  onPress={() => alternarConclusao(item.id)}
-                  activeOpacity={0.8}
-                  accessibilityRole="button"
-                  accessibilityLabel={
-                    concluida
-                      ? `Desmarcar revisão de ${item.titulo}`
-                      : `Marcar revisão de ${item.titulo} como concluída`
-                  }
-                >
-                  <CheckCircle2
-                    size={18}
-                    color={concluida ? '#FFFFFF' : colors.primary}
-                  />
-                  <Text
-                    style={[
-                      styles.completeButtonText,
-                      concluida && styles.completeButtonTextActive,
-                    ]}
-                  >
-                    {concluida ? 'Concluída' : 'Marcar'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            );
-          })}
-        </View>
+                  <View style={styles.actionsRow}>
+                    <TouchableOpacity
+                      style={styles.reviewButton}
+                      onPress={() => abrirLicao(item)}
+                      activeOpacity={0.8}
+                    >
+                      <RotateCcw size={17} color={colors.primary} />
+                      <Text style={styles.reviewButtonText}>
+                        Revisar novamente
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.completeButton,
+                        concluida && styles.completeButtonActive,
+                      ]}
+                      onPress={() => alternarConclusao(item.id)}
+                      disabled={alterandoId !== null}
+                      activeOpacity={0.8}
+                    >
+                      <CheckCircle2
+                        size={17}
+                        color={concluida ? '#FFFFFF' : colors.primary}
+                      />
+                      <Text
+                        style={[
+                          styles.completeButtonText,
+                          concluida && styles.completeButtonTextActive,
+                        ]}
+                      >
+                        {concluida ? 'Concluída' : 'Marcar'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
 
         <View style={styles.infoBox}>
           <View style={styles.infoIcon}>
@@ -428,9 +500,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 9,
     borderRadius: 9,
   },
-  badgeUrgente: {
-    backgroundColor: 'rgba(244, 63, 94, 0.12)',
-  },
   badgeAgendado: {
     backgroundColor: colors.primaryLight,
   },
@@ -441,14 +510,34 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
   },
-  textUrgente: {
-    color: colors.danger,
-  },
   textAgendado: {
     color: colors.primary,
   },
   textConcluido: {
     color: '#16804A',
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  reviewButton: {
+    flex: 1,
+    minWidth: 145,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 7,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+    paddingVertical: 11,
+    paddingHorizontal: 10,
+  },
+  reviewButtonText: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '700',
   },
   completeButton: {
     flexDirection: 'row',
@@ -458,7 +547,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 10,
-    paddingVertical: 10,
+    paddingVertical: 11,
     paddingHorizontal: 12,
   },
   completeButtonActive: {
@@ -472,6 +561,44 @@ const styles = StyleSheet.create({
   },
   completeButtonTextActive: {
     color: '#FFFFFF',
+  },
+  estadoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 14,
+    gap: 12,
+  },
+  vazioTitulo: {
+    color: colors.textMain,
+    fontSize: 16,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  estadoTexto: {
+    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
+  acaoButton: {
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  acaoButtonTexto: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 13,
   },
   infoBox: {
     flexDirection: 'row',

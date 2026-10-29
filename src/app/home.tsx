@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { BookOpen,
+import {
+  BookOpen,
   CalendarDays,
   RotateCcw,
   UserRound,
@@ -11,7 +12,9 @@ import { BookOpen,
   ChevronRight,
   Target,
   ChartNoAxesColumnIncreasing,
-  Home, } from 'lucide-react-native';
+  Home,
+  MessageCircle,
+ } from 'lucide-react-native';
 
 import { colors } from '../theme/colors';
 
@@ -132,6 +135,29 @@ export default function HomeScreen() {
             <Text style={styles.simuladoArrow}>➔</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Botão para acessar os comentários */}
+        <TouchableOpacity
+          style={styles.commentsButton}
+          onPress={() => router.push('/comentarios')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.commentsIcon}>
+            <MessageCircle size={24} color={colors.primary} />
+          </View>
+
+          <View style={styles.commentsInfo}>
+            <Text style={styles.commentsTitle}>
+              Comentários e sugestões
+            </Text>
+            <Text style={styles.commentsSubtitle}>
+              Compartilhe sua opinião sobre o Meu ENEM.
+            </Text>
+          </View>
+
+          <ChevronRight size={22} color={colors.primary} />
+        </TouchableOpacity>
+
 
       </ScrollView>
 
@@ -333,5 +359,43 @@ const styles = StyleSheet.create({
     color: colors.primary, 
     fontWeight: 'bold', 
     marginTop: 4 
-  }
+  },
+
+
+  commentsButton: {
+    width: '100%',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: colors.radius,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  commentsIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  commentsInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  commentsTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: colors.textMain,
+  },
+  commentsSubtitle: {
+    fontSize: 12,
+    color: colors.textMuted,
+    lineHeight: 18,
+  },
+
 });
